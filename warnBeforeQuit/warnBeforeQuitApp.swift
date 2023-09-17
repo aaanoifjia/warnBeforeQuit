@@ -11,7 +11,7 @@ import SwiftUI
 struct warnBeforeQuitApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            mainView()
         }
     }
 }
