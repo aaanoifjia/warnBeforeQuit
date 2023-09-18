@@ -60,31 +60,68 @@ struct mainView_preview: PreviewProvider {
 }
 
 
-var appURLs = Set<URL>()
 
-struct AppView: View{
+func getAppName(from url: URL) -> String? {
+    if let appBundle = Bundle(url: url),
+       let appName = appBundle.object(forInfoDictionaryKey: "CFBundleName") as? String {
+        return appName
+    }
+    return nil
+}
+
+struct AppView: View {
+    @State private var appURLs = Set<URL>()
+    func openSelectionPanel() {
+
+        // Handle button tap event
+        print("Openning selection panel...")
+        
+        let viewController = ViewController()
+        print("vieController initialized")
+        let urls = viewController.chooseanApp(NSButton())
+        if !(urls.isEmpty){
+            appURLs.formUnion(urls)
+        }
+    }
+    let cols: [GridItem] = [
+        .init(.flexible()),
+        .init(.flexible()),
+        .init(.flexible()),
+        .init(.flexible()),
+        .init(.flexible()),
+        .init(.flexible())
+    ]
 
     var body: some View {
-        Button(action: {
-            task{
-                await openSelectionPanel()
-                print(appURLs)
-            }
-                }) {
-                    // Button label
-                    Text("Add App")
-                        .foregroundColor(.white)
-                        .padding()
-                        .background(Color.blue)
-                        .cornerRadius(10)
+        VStack{
+            Button(
+                action: { openSelectionPanel(); print(appURLs)})
+            {Label: do { Text("Add App")}}
+            
+            ScrollView(){
+                LazyVGrid(columns: cols){
+                    ForEach(Array(appURLs), id: \.self){ app in
+                        VStack {
+                            let icon = NSWorkspace.shared.icon(forFile: app.path)
+                            Image(nsImage: icon)
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+
+    //                        } else{
+    //                            Image(systemName: "app")
+    //                                .resizable()
+    //                                .aspectRatio(contentMode: .fit)
+    //                                .frame(width: 50, height: 50)
+    //                        }
+    //                        let appName = app.lastPathComponent
+    //                        Text(appName)
+                        }
+                    }
                 }
             }
-            func openSelectionPanel() {
-                // Handle button tap event
-                print("Openning selection panel...")
-                
-                let viewController = ViewController()
-                print("vieController initialized")
-                viewController.chooseanApp(NSButton())
-            }
+            Spacer()
+        }
     }
+}
+
+

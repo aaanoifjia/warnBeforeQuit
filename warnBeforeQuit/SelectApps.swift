@@ -8,8 +8,12 @@
 import Cocoa
 import UniformTypeIdentifiers
 
+
 class ViewController: NSViewController {
-    @IBAction func chooseanApp(_ sender: NSButton) {
+    enum selectPanel: Error{
+        case selectFail
+    }
+    func chooseanApp(_ sender: NSButton) -> [URL]{
         print("Initializing panel...")
         let openPanel = NSOpenPanel()
         openPanel.title = "Choose Application"
@@ -17,11 +21,12 @@ class ViewController: NSViewController {
         if let appType = UTType.init("com.apple.application"){
             openPanel.allowedContentTypes = [appType]
         }
-        openPanel.allowsMultipleSelection = false
+        openPanel.allowsMultipleSelection = true
         openPanel.canChooseDirectories = false
-        let response = openPanel.runModal()
-        guard response == .OK, let url = openPanel.url else { return }
-        appURLs.insert(url)
-
+        if openPanel.runModal() == .OK{
+            let urls = openPanel.urls
+            return urls
+        }
+        return []
     }
 }
